@@ -5,7 +5,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/Agnus-sk/multi-env-devops-pipeline.git'
+                git branch: 'main', url: 'https://github.com/Agnus-sk/multi-env-devops-pipeline.git'
             }
         }
 
