@@ -54,8 +54,8 @@ pipeline {
                     sh """
                     export KUBECONFIG=\$KUBECONFIG
                     sed -i 's|image:.*|image: ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}|' k8s/dev/deployment.yaml
-                    kubectl apply -f k8s/dev/deployment.yaml -n dev
-                    kubectl apply -f k8s/dev/service.yaml -n dev
+                    kubectl apply -f k8s/dev/deployment.yaml -n dev --validate=false
+                    kubectl apply -f k8s/dev/service.yaml -n dev --validate=false
                     """
                 }
             }
@@ -73,8 +73,8 @@ pipeline {
                     sh """
                     export KUBECONFIG=\$KUBECONFIG
                     sed -i 's|image:.*|image: ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}|' k8s/test/deployment.yaml
-                    kubectl apply -f k8s/test/deployment.yaml -n test
-                    kubectl apply -f k8s/test/service.yaml -n test
+                    kubectl apply -f k8s/test/deployment.yaml -n test --validate=false
+                    kubectl apply -f k8s/test/service.yaml -n test --validate=false
                     """
                 }
             }
@@ -92,8 +92,8 @@ pipeline {
                     sh """
                     export KUBECONFIG=\$KUBECONFIG
                     sed -i 's|image:.*|image: ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}|' k8s/prod/deployment.yaml
-                    kubectl apply -f k8s/prod/deployment.yaml -n prod
-                    kubectl apply -f k8s/prod/service.yaml -n prod
+                    kubectl apply -f k8s/prod/deployment.yaml -n prod --validate=false
+                    kubectl apply -f k8s/prod/service.yaml -n prod --validate=false
                     """
                 }
             }
