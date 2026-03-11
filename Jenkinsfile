@@ -2,8 +2,9 @@ pipeline {
     agent any
 
     environment {
+        DOCKER_USER = "agnussk"
         IMAGE_NAME = "multi-env-app"
-        DOCKER_IMAGE = ""
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -24,17 +25,16 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                sh 'docker build -t multi-env-app .'
+                sh "docker build -t ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
             }
         }
 
         stage('Docker Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-token', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-token', usernameVariable: 'DOCKER_USER_NAME', passwordVariable: 'DOCKER_PASS')]) {
                     sh '''
-                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                    docker tag multi-env-app $DOCKER_USER/multi-env-app:latest
-                    docker push $DOCKER_USER/multi-env-app:latest
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER_NAME --password-stdin
+                    docker push ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}
                     '''
                 }
             }
@@ -42,10 +42,11 @@ pipeline {
 
         stage('Deploy to DEV') {
             steps {
-                sh '''
+                sh """
+                sed -i 's|image:.*|image: ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}|' k8s/dev/deployment.yaml
                 kubectl apply -f k8s/dev/deployment.yaml -n dev
                 kubectl apply -f k8s/dev/service.yaml -n dev
-                '''
+                """
             }
         }
 
@@ -57,10 +58,11 @@ pipeline {
 
         stage('Deploy to TEST') {
             steps {
-                sh '''
+                sh """
+                sed -i 's|image:.*|image: ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}|' k8s/test/deployment.yaml
                 kubectl apply -f k8s/test/deployment.yaml -n test
                 kubectl apply -f k8s/test/service.yaml -n test
-                '''
+                """
             }
         }
 
@@ -72,10 +74,11 @@ pipeline {
 
         stage('Deploy to PROD') {
             steps {
-                sh '''
+                sh """
+                sed -i 's|image:.*|image: ${DOCKER_USER}/${IMAGE_NAME}:${IMAGE_TAG}|' k8s/prod/deployment.yaml
                 kubectl apply -f k8s/prod/deployment.yaml -n prod
                 kubectl apply -f k8s/prod/service.yaml -n prod
-                '''
+                """
             }
         }
 
