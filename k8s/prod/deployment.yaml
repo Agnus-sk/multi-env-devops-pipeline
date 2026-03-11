@@ -17,3 +17,6 @@ spec:
         image: agnussk/multi-env-app:latest
         ports:
         - containerPort: 8080
+        env:
+        - name: app.env
+          value: PROD
